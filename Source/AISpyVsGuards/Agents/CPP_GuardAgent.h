@@ -34,8 +34,14 @@ public:
 	bool GetHasSpottedStatus();
 	void SetHasSpottedStatus(bool a_btrue);
 
+	UFUNCTION()
+		void OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
 private:
 	Behaviour* m_pCurrentBehaviour;
+	//Trigger capsule for capturing the spy
+	UPROPERTY(EditAnywhere, Category = "Trigger Capsule")
+		class UCapsuleComponent* m_pTriggerCapsule;
 
 	//Tells us if the guard has spotted the spy
 	UPROPERTY(EditAnywhere)
