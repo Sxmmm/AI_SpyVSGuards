@@ -22,5 +22,4 @@ public:
 private:
 	PATROL_STATE m_eCurrentPatrolState;
 
-	AActor* m_pTargetActor;
 };

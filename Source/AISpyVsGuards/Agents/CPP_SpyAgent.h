@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+//KEEP THIS INCLUDE LAST
 #include "CPP_SpyAgent.generated.h"
 
 UCLASS()

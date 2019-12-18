@@ -1,4 +1,5 @@
 #include "CPP_GuardAgent.h"
+#include "Agents/CPP_SpyAgent.h"
 #include "StateMachine/Behaviour.h"
 #include "StateMachine/Patrol.h"
 #include "StateMachine/Attack.h"
@@ -69,6 +70,7 @@ void ACPP_GuardAgent::SetHasSpottedStatus(bool a_bTrue)
 	m_bSpotted = a_bTrue;
 }
 
+
 void ACPP_GuardAgent::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Collision"));
@@ -86,5 +88,13 @@ void ACPP_GuardAgent::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, 
 
 void ACPP_GuardAgent::OnSightOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Sight Collision"));
+	if (OtherActor && (OtherActor != this) && OtherComp)
+	{
+		ACPP_SpyAgent* pOtherAgent = Cast<ACPP_SpyAgent>(OtherActor);
+		if (pOtherAgent)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Spotted The Spy!!!"));
+			SetHasSpottedStatus(true);
+		}
+	}
 }
