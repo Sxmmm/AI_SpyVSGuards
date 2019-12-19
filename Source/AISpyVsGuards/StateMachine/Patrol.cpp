@@ -11,6 +11,7 @@
 
 Patrol::Patrol(ACPP_GuardAgent* pOwner) : Behaviour(pOwner)
 {
+	UE_LOG(LogTemp, Warning, TEXT("PATROL"));
 	m_eCurrentPatrolState = FIND_NEXT_POSITION;
 }
 

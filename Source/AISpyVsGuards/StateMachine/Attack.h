@@ -8,8 +8,8 @@ enum ATTACK_STATE
 {
 	GET_SPY_POSITION,
 	MOVE_TO_SPY_POSITION,
+	GET_SPY_LAST_POSITION,
 	LOOK_AROUND_FOR_SPY,
-	CAPTURE_SPY
 };
 
 class Attack : public Behaviour
@@ -21,9 +21,14 @@ public:
 	void Update();
 	Behaviour* CheckConditions();
 
+	FVector GetLastKnownPosition();
+	void SetLastKnownPosition(FVector a_vpos);
+
 private:
 	ATTACK_STATE m_eCurrentAttackState;
 
 	AActor* m_pTargetActor; //Stores the spy upon sight
+	UPROPERTY(EditAnywhere)
+		FVector LastKnowSpyPos;
 };
 

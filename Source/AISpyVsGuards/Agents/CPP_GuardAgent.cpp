@@ -3,6 +3,7 @@
 #include "StateMachine/Behaviour.h"
 #include "StateMachine/Patrol.h"
 #include "StateMachine/Attack.h"
+#include "Engine/Classes/Kismet/GameplayStatics.h"
 #include "Engine/Classes/Components/CapsuleComponent.h"
 #include "Engine/Classes/Components/BoxComponent.h"
 
@@ -19,9 +20,10 @@ ACPP_GuardAgent::ACPP_GuardAgent()
 	m_pTriggerCapsule->OnComponentBeginOverlap.AddDynamic(this, &ACPP_GuardAgent::OnOverlapBegin);
 
 	m_pSightTrigger = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxOverlapForSight"));
-	m_pSightTrigger->InitBoxExtent(FVector(275.0f, 130.0f, 32.0f));
-	m_pSightTrigger->SetAllPhysicsPosition(FVector(335.0f, 0.0f, 0.0f));
+	m_pSightTrigger->InitBoxExtent(FVector(350.0f, 175.0f, 32.0f));
+	m_pSightTrigger->SetAllPhysicsPosition(FVector(305.0f, 0.0f, 0.0f));
 	m_pSightTrigger->SetCollisionProfileName(TEXT("Trigger"));
+	m_pSightTrigger->SetHiddenInGame(false);
 	m_pSightTrigger->SetupAttachment(RootComponent);
 	m_pSightTrigger->OnComponentBeginOverlap.AddDynamic(this, &ACPP_GuardAgent::OnSightOverlapBegin);
 }
@@ -74,20 +76,20 @@ void ACPP_GuardAgent::SetHasSpottedStatus(bool a_bTrue)
 void ACPP_GuardAgent::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Collision"));
-	//if (OtherActor && (OtherActor != this) && OtherComp)
-	//{
-	//	ACPP_GuardAgent* pOtherAgent = Cast<ACPP_GuardAgent>(OtherActor);
-	//	if (pOtherAgent && pOtherAgent->GetInfectedStatus())
-	//	{
-	//		//printFString("Overlapped Actor = %s", *OtherActor->GetName());
-
-	//		SetInfectedStatus(true);
-	//	}
-	//}
+	if (OtherActor && (OtherActor != this) && OtherComp)
+	{
+		ACPP_SpyAgent* pOtherAgent = Cast<ACPP_SpyAgent>(OtherActor);
+		if (pOtherAgent)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Game Over"));
+			//UGameplayStatics::OpenLevel(GetOwner()->GetWorld(), FName(*GetOwner()->GetWorld()->GetName()), false);
+		}
+	}
 }
 
 void ACPP_GuardAgent::OnSightOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	UE_LOG(LogTemp, Warning, TEXT("Collision"));
 	if (OtherActor && (OtherActor != this) && OtherComp)
 	{
 		ACPP_SpyAgent* pOtherAgent = Cast<ACPP_SpyAgent>(OtherActor);

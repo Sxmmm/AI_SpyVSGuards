@@ -12,6 +12,7 @@
 
 Attack::Attack(ACPP_GuardAgent* pOwner) : Behaviour(pOwner)
 {
+	UE_LOG(LogTemp, Warning, TEXT("ATTACK"));
 	m_eCurrentAttackState = GET_SPY_POSITION;
 }
 
@@ -49,21 +50,47 @@ void Attack::Update()
 
 			if (m_pTargetActor)//Null check
 			{
-				if (FVector::Dist(GetOwner()->GetActorLocation(), m_pTargetActor->GetActorLocation()) <= 100.0f)
-				{
-					//If the spy is in reach
-					m_eCurrentAttackState = CAPTURE_SPY;
-				}
 
-				//if (FVector::Dist(GetOwner()->GetActorLocation(), m_pTargetActor->GetActorLocation()) <= 5000.0f)
-				//{
-				//	//IF SPY IS OUT OF SENSORY RANGE
-				//	m_eCurrentAttackState = LOOK_AROUND_FOR_SPY;
-				//}
+				if (FVector::Dist(GetOwner()->GetActorLocation(), m_pTargetActor->GetActorLocation()) >= 1000.0f)
+				{
+					//IF SPY IS OUT OF SENSORY RANGE
+					SetLastKnownPosition(m_pTargetActor->GetActorLocation());
+					m_eCurrentAttackState = GET_SPY_LAST_POSITION;
+					UE_LOG(LogTemp, Warning, TEXT("Lost Spy!!!"));
+				}
+				else
+				{
+					m_eCurrentAttackState = GET_SPY_POSITION;
+				}
 			}
 			else
 			{
-				m_eCurrentAttackState = GET_SPY_POSITION; //Find new target
+				m_eCurrentAttackState = GET_SPY_POSITION;
+			}
+		}
+		break;
+	}
+	case GET_SPY_LAST_POSITION:
+	{
+		AAIController* pAIController = Cast<AAIController>(GetOwner()->GetController());
+		UAIBlueprintHelperLibrary::SimpleMoveToLocation(pAIController, GetLastKnownPosition());
+
+		if (FVector::Dist(GetOwner()->GetActorLocation(), m_pTargetActor->GetActorLocation()) <= 500.0f)
+		{
+			m_eCurrentAttackState = MOVE_TO_SPY_POSITION;
+		}
+		if (FVector::Dist(GetOwner()->GetActorLocation(), GetLastKnownPosition()) <= 100.0f)
+		{
+			if (FVector::Dist(GetOwner()->GetActorLocation(), m_pTargetActor->GetActorLocation()) <= 500.0f)
+			{
+				m_eCurrentAttackState = MOVE_TO_SPY_POSITION;
+			}
+			else
+			{
+				m_eCurrentAttackState = LOOK_AROUND_FOR_SPY;
+				//GetOwner()->SetHasSpottedStatus(false);
+				UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetCurrent(GetOwner()->GetWorld());
+				SetLastKnownPosition(NavSystem->GetRandomPointInNavigableRadius(GetOwner()->GetWorld(), GetOwner()->GetActorLocation(), 500.0f));
 			}
 		}
 		break;
@@ -74,18 +101,17 @@ void Attack::Update()
 		AAIController* pAIController = Cast<AAIController>(GetOwner()->GetController());
 
 		UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetCurrent(GetOwner()->GetWorld());
-		FVector vRandPos = NavSystem->GetRandomPointInNavigableRadius(GetOwner()->GetWorld(), pAIController->GetNavAgentLocation(), 20000.0f);
-		UAIBlueprintHelperLibrary::SimpleMoveToLocation(pAIController, vRandPos);
 
-
-		m_eCurrentAttackState = MOVE_TO_SPY_POSITION;
-		//IF SPY IS IN REACH
-		m_eCurrentAttackState = CAPTURE_SPY;
-		break;
-	}
-	case CAPTURE_SPY:
-	{
-		UGameplayStatics::OpenLevel(GetOwner()->GetWorld(), FName(*GetOwner()->GetWorld()->GetName()), false);
+		UAIBlueprintHelperLibrary::SimpleMoveToLocation(pAIController, GetLastKnownPosition());
+		if (FVector::Dist(GetOwner()->GetActorLocation(), m_pTargetActor->GetActorLocation()) <= 750.0f)
+		{
+			m_eCurrentAttackState = MOVE_TO_SPY_POSITION;
+		}
+		else if ((FVector::Dist(GetOwner()->GetActorLocation(), GetLastKnownPosition()) <= 200.0f) || (pAIController->GetMoveStatus() != EPathFollowingStatus::Moving))
+		{
+			SetLastKnownPosition(NavSystem->GetRandomPointInNavigableRadius(GetOwner()->GetWorld(), GetOwner()->GetActorLocation(), 500.0f));
+			//UE_LOG(LogTemp, Warning, TEXT("Random Pos: %s AI Pos: %s"), GetLastKnownPosition().ToString(), GetOwner()->GetActorLocation().ToString());
+		}
 		break;
 	}
 	}
@@ -99,4 +125,14 @@ Behaviour* Attack::CheckConditions()
 		return new Patrol(GetOwner());
 	}
 	return nullptr;
+}
+
+FVector Attack::GetLastKnownPosition()
+{
+	return LastKnowSpyPos;
+}
+
+void Attack::SetLastKnownPosition(FVector a_vpos)
+{
+	LastKnowSpyPos = a_vpos;
 }
