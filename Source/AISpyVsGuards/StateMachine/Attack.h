@@ -27,7 +27,7 @@ public:
 private:
 	ATTACK_STATE m_eCurrentAttackState;
 
-	AActor* m_pTargetActor; //Stores the spy upon sight
+	AActor* m_pTargetActor;
 	UPROPERTY(EditAnywhere)
 		FVector LastKnowSpyPos;
 	UPROPERTY(EditAnywhere)

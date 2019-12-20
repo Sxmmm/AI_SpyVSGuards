@@ -7,11 +7,11 @@
 #include "Runtime/NavigationSystem/Public/NavigationSystem.h"
 #include "Runtime/NavigationSystem/Public/AbstractNavData.h"
 
-
-
+//Init patrol behaviour
 Patrol::Patrol(ACPP_GuardAgent* pOwner) : Behaviour(pOwner)
 {
 	UE_LOG(LogTemp, Warning, TEXT("PATROL"));
+	//Setting start state
 	m_eCurrentPatrolState = FIND_NEXT_POSITION;
 }
 
@@ -21,12 +21,12 @@ void Patrol::Update()
 	{
 	case FIND_NEXT_POSITION:
 	{
-		//Find New Position
+		//Getting the AI controller of the guard
 		AAIController* pAIController = Cast<AAIController>(GetOwner()->GetController());
 
 		if (pAIController)
 		{
-			//Assign the navigation mesh, pick a random position and move to it
+			//Picking a random point on the navigation mesh and sending the guard to it
 			UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetCurrent(GetOwner()->GetWorld());
 			FVector vRandPos = NavSystem->GetRandomPointInNavigableRadius(GetOwner()->GetWorld(), pAIController->GetNavAgentLocation(), 20000.0f);
 			UAIBlueprintHelperLibrary::SimpleMoveToLocation(pAIController, vRandPos);
@@ -46,7 +46,7 @@ void Patrol::Update()
 			{
 				m_eCurrentPatrolState = FIND_NEXT_POSITION;
 			}
-
+			//Double checking, the guards path may uncompleteable
 			if (pAIController->GetMoveStatus() == EPathFollowingStatus::Waiting)
 			{
 				m_eCurrentPatrolState = FIND_NEXT_POSITION;
@@ -57,6 +57,7 @@ void Patrol::Update()
 	}
 }
 
+//If the spy is found, the has spotted status will be changed and attack will be its new behaviour
 Behaviour* Patrol::CheckConditions()
 {
 	//Has the guard spotted the spy
