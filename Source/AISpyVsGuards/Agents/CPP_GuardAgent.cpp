@@ -82,7 +82,7 @@ void ACPP_GuardAgent::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, 
 		if (pOtherAgent)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Game Over"));
-			UGameplayStatics::OpenLevel(GetOwner()->GetWorld(), FName(*GetOwner()->GetWorld()->GetName()), false);
+			//UGameplayStatics::OpenLevel(GetOwner()->GetWorld(), FName(*GetOwner()->GetWorld()->GetName()), false);
 		}
 	}
 }
