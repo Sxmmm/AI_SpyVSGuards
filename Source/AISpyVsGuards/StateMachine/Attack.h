@@ -30,5 +30,7 @@ private:
 	AActor* m_pTargetActor; //Stores the spy upon sight
 	UPROPERTY(EditAnywhere)
 		FVector LastKnowSpyPos;
+	UPROPERTY(EditAnywhere)
+		int LookLoop;
 };
 

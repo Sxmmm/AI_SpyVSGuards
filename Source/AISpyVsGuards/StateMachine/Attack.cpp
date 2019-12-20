@@ -81,16 +81,17 @@ void Attack::Update()
 		}
 		if (FVector::Dist(GetOwner()->GetActorLocation(), GetLastKnownPosition()) <= 100.0f)
 		{
+			UE_LOG(LogTemp, Warning, TEXT("At Location"));
 			if (FVector::Dist(GetOwner()->GetActorLocation(), m_pTargetActor->GetActorLocation()) <= 500.0f)
 			{
 				m_eCurrentAttackState = MOVE_TO_SPY_POSITION;
 			}
 			else
 			{
+				UE_LOG(LogTemp, Warning, TEXT("Look For Spy!!!"));
 				m_eCurrentAttackState = LOOK_AROUND_FOR_SPY;
-				//GetOwner()->SetHasSpottedStatus(false);
 				UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetCurrent(GetOwner()->GetWorld());
-				SetLastKnownPosition(NavSystem->GetRandomPointInNavigableRadius(GetOwner()->GetWorld(), GetOwner()->GetActorLocation(), 500.0f));
+				SetLastKnownPosition(NavSystem->GetRandomPointInNavigableRadius(GetOwner()->GetWorld(), (GetOwner()->GetActorLocation() + m_pTargetActor->GetActorLocation()) / 2, 500.0f));
 			}
 		}
 		break;
@@ -105,12 +106,20 @@ void Attack::Update()
 		UAIBlueprintHelperLibrary::SimpleMoveToLocation(pAIController, GetLastKnownPosition());
 		if (FVector::Dist(GetOwner()->GetActorLocation(), m_pTargetActor->GetActorLocation()) <= 750.0f)
 		{
+			//Reset the looking for spy loop
+			LookLoop = 0;
 			m_eCurrentAttackState = MOVE_TO_SPY_POSITION;
 		}
-		else if ((FVector::Dist(GetOwner()->GetActorLocation(), GetLastKnownPosition()) <= 200.0f) || (pAIController->GetMoveStatus() != EPathFollowingStatus::Moving))
+		else if (FVector::Dist(GetOwner()->GetActorLocation(), GetLastKnownPosition()) <= 250.0f)
 		{
-			SetLastKnownPosition(NavSystem->GetRandomPointInNavigableRadius(GetOwner()->GetWorld(), GetOwner()->GetActorLocation(), 500.0f));
-			//UE_LOG(LogTemp, Warning, TEXT("Random Pos: %s AI Pos: %s"), GetLastKnownPosition().ToString(), GetOwner()->GetActorLocation().ToString());
+			SetLastKnownPosition(NavSystem->GetRandomPointInNavigableRadius(GetOwner()->GetWorld(), (GetOwner()->GetActorLocation() + m_pTargetActor->GetActorLocation()) / 2, 500.0f));
+			UE_LOG(LogTemp, Warning, TEXT("RAND"));
+			LookLoop += 1;
+		}
+		if(LookLoop >= 2)
+		{
+			LookLoop = 0;
+			GetOwner()->SetHasSpottedStatus(false);
 		}
 		break;
 	}
