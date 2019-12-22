@@ -16,15 +16,41 @@ public:
 	// Sets default values for this character's properties
 	ACPP_SpyAgent();
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+	void LoadAvailableActions();
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	TSet<TPair<FString, bool>> GetPlayersCurrentState();
 
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	TSet<TPair<FString, bool>> CreateGoalState();
 
+	void PlanFailed(TSet<TPair<FString, bool>> a_kvpFailedGoal);
+	//Need GOAP_Action first
+	//void PlanFound(TSet<TPair<FString, bool>> a_kvpGoal, TQueue<GOAP_Action*> a_qActionQueue);
+
+	void AllActionsFinished();
+
+	//Need GOAP_Action first
+	//void AbortPlan(GOAP_Action* a_FailedAction);
+
+	//bool MoveAgentToAction(GOAP_Action* a_NextAction);
+
+	//bool MoveAgentToAction(GOAP_Action* a_NextAction, bool a_bVector);
+
+	//TSet<GOAP_Action*> GetActionList();
+
+	bool HaveIBeenSpotted();
+	void SetHaveIBeenSpotted(bool a_bSpotted);
+	bool AreGuardsNear();
+	void SetAreGuardsNear(bool a_bGuardsNear);
+	bool DoIHaveTheKey();
+	void SetDoIHaveTheKey(bool a_bHaveKey);
+	bool IsGuardAboutToCatchMe();
+	void SetIsGuardAboutToCatchMe(bool a_bAboutToCatch);
+
+private:	
+	bool m_bHaveBeenSpotted = false;
+	bool m_bAreGuardsNear = false;
+	bool m_bDoIHaveTheKey = false;
+	bool m_bIsGuardAboutToCatchMe = false;
+
+	//TSet<GOAP_Action*> m_sAvailableActions;
 };
