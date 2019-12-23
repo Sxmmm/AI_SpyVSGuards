@@ -1,7 +1,7 @@
 #pragma once
-#include "Queue.h"
-#include "Map.h"
-#include "Set.h"
+#include "Containers/Queue.h"
+#include "Containers/Map.h"
+#include "Containers/Set.h"
 #include "List.h"
 #include "CoreMinimal.h"
 

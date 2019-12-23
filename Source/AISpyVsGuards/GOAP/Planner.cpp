@@ -2,9 +2,11 @@
 #include "GOAP/Action.h"
 #include "GOAP/Node.h"
 
+#include "Materials/MaterialInstanceDynamic.h"
 #include "Engine/Classes/Components/SkeletalMeshComponent.h"
 #include "Classes/Blueprint/AIBlueprintHelperLibrary.h"
 #include "Engine/Classes/Kismet/GameplayStatics.h"
+#include "Algo/Reverse.h"
 
 Planner::Planner()
 {
@@ -14,69 +16,75 @@ Planner::~Planner()
 {
 }
 
-void Planner::CreateActionPlan(AActor * a_pAIAgent, TSet<Action*> a_sAvailableActions, TSet<TPair<FString, bool>>& a_smWorldState, TSet<TPair<FString, bool>>& a_smGoalState, TQueue<Action*>* a_qActionPlan)
+void Planner::CreateActionPlan(AActor* a_pAIAgent, TSet<Action*> a_sAvailableActions, TSet<TPair<FString, bool>>& a_smWorldState, TSet<TPair<FString, bool>>& a_smGoalState, TQueue<Action*>* a_qActionPlan)
 {
+	//Reset all of the Action specific variables
 	for (Action* pAction : a_sAvailableActions)
 	{
 		pAction->ResetAction();
 	}
 
+	//Find the actions that this agent is currently able to perform
 	TSet<Action*> sUsableActions;
 	for (Action* pAction : a_sAvailableActions)
 	{
-		if (pAction->CheckPreCondition(a_pAIAgent))
+		if (pAction->CheckPreCondition(a_pAIAgent))//If the agent can actually run that action.
 		{
 			sUsableActions.Add(pAction);
 		}
 	}
 
+	//Create a Tree diagram of every path we are able to take, then ride it to the goal.
 	TArray<Node*> nLeaves;
-	Node* nStartNode = new Node(nullptr, 0, a_smWorldState, nullptr);
+	Node* nStartNode = new Node(nullptr, 0, a_smWorldState, nullptr);//Beginning node, for other nodes to parent to.
 	bool bSuccessfulTree = BuildGOAPPlan(nStartNode, nLeaves, sUsableActions, a_smGoalState);
 
 	if (!bSuccessfulTree)
 	{
-		return;
+		return;//Could not build a successful plan, no combination of actions found that satisfy a goal.
 	}
 
+	//Find the cheapest path from the Tree diagram.
 	Node* nCheapestPlan = nullptr;
 	for (Node* nNode : nLeaves)
 	{
-		if (nCheapestPlan == nullptr)
+		if (nCheapestPlan == nullptr)//If cheapest plan has not yet been set.
 		{
 			nCheapestPlan = nNode;
 		}
 		else
 		{
-			if (nNode->m_fCost < nCheapestPlan->m_fCost)
+			if (nNode->m_fCost < nCheapestPlan->m_fCost)//If the cost of the current plan is cheaper than the chosen plan
 			{
-				nCheapestPlan = nNode;
+				nCheapestPlan = nNode;//Replace it with the cheaper one
 			}
 		}
 	}
 
+	//Create the final plan of actions
 	TSet<Action*> lFinishedPlan = TSet<Action*>();
-	while (nCheapestPlan)
+	while (nCheapestPlan)//While the cheapest plan does not equal the beginning parent node.
 	{
-		if (nCheapestPlan->m_Action)
+		if (nCheapestPlan->m_Action)//Null check
 		{
-			lFinishedPlan.Add(nCheapestPlan->m_Action);
+			lFinishedPlan.Add(nCheapestPlan->m_Action);//Add it to the plan
 		}
-		if (nCheapestPlan->m_nParentNode == nullptr)
+		if (nCheapestPlan->m_nParentNode == nullptr)//Null check
 		{
-			nCheapestPlan = nullptr;
+			nCheapestPlan = nullptr;//End the while loop
 		}
 		else
 		{
-			nCheapestPlan = nCheapestPlan->m_nParentNode;
+			nCheapestPlan = nCheapestPlan->m_nParentNode;//Move on to the parent node.
 		}
 	}
-	TArray<Action*> lFinishedPlanB = lFinishedPlan.Array();
+	TArray<Action*> lFinishedPlanB = lFinishedPlan.Array();//Convert the Set to a TArray.
 
-	Algo::Reverse(lFinishedPlanB);
+	Algo::Reverse(lFinishedPlanB);//Reverse the TArray so that the first action the actor needs to perform is at the beginning of the list.
 
-	a_qActionPlan->Empty();
+	a_qActionPlan->Empty();//Empty the ActionQueue
 
+	//Convert the TArray to a Queue to run through
 	for (Action* pAction : lFinishedPlanB)
 	{
 		a_qActionPlan->Enqueue(pAction);//Queue the new action.
@@ -97,17 +105,20 @@ bool Planner::BuildGOAPPlan(Node* a_nParent, TArray<Node*>& a_nNodeList, TSet<Ac
 
 			if (GoalMatchesState(a_smGoalState, smCurrentState))//Check if any of the goals can be satisfied by the new updated state.
 			{
-				a_nNodeList.Add(nNewNode);
-				bFoundSuccessfulPath = true;
+				a_nNodeList.Add(nNewNode);//Add the new node to the Node list.
+				bFoundSuccessfulPath = true;//We have a path that satisfies a goal!
 
+				//Don't break out yet, since other actions may satisfy other goals.
 			}
 			else
 			{
-				TSet<Action*> sChildBranches = GatherNewActions(a_sUsableActions, pAction);
+				//Recursive part, check the rest of the actions with the newly calculated player state.
+
+				TSet<Action*> sChildBranches = GatherNewActions(a_sUsableActions, pAction);//Gather a list of actions, excluding the one we just used.
 				bool bFoundSecondPath = BuildGOAPPlan(nNewNode, a_nNodeList, sChildBranches, a_smGoalState);
 				if (bFoundSecondPath)
 				{
-					bFoundSuccessfulPath = true;
+					bFoundSuccessfulPath = true;//We found another way to satisfy a goal.
 				}
 			}
 		}
@@ -118,13 +129,13 @@ bool Planner::BuildGOAPPlan(Node* a_nParent, TArray<Node*>& a_nNodeList, TSet<Ac
 bool Planner::GoalMatchesState(TSet<TPair<FString, bool>> a_smGoal, TSet<TPair<FString, bool>> a_smState)
 {
 	bool bIsInState = false;
-	for (TPair<FString, bool> mGoal : a_smGoal)
+	for (TPair<FString, bool> mGoal : a_smGoal)//Loop through the given goals
 	{
-		for (TPair<FString, bool> mState : a_smState)
+		for (TPair<FString, bool> mState : a_smState)//Loop through the given states
 		{
-			if (mGoal.Key == mState.Key)
+			if (mGoal.Key == mState.Key)//If the keys are the same
 			{
-				if (mGoal.Value == mState.Value)
+				if (mGoal.Value == mState.Value)//If the values of the keys are also the same
 				{
 					bIsInState = true;
 					break;
@@ -151,7 +162,7 @@ bool Planner::MatchesPlayersCurrentState(TSet<TPair<FString, bool>> a_smPreCondi
 				}
 			}
 		}
-		if (bPreConditionMet == false)
+		if (bPreConditionMet == false)//If ONE or more of the preconditions isn't met it means we cannot run this action.
 		{
 			bAllPreconditionsMet = false;
 		}
@@ -174,10 +185,11 @@ TSet<Action*> Planner::GatherNewActions(TSet<Action*> a_sActions, Action* a_Excl
 
 TSet<TPair<FString, bool>> Planner::RefreshPlayersState(TSet<TPair<FString, bool>> a_smCurrentState, TSet<TPair<FString, bool>> a_smStateChange)
 {
-	TSet<TPair<FString, bool>> smNewState = TSet<TPair<FString, bool>>();
+	TSet<TPair<FString, bool>> smNewState = TSet<TPair<FString, bool>>();//Stores the new state
 
-	TPair<FString, bool> mPairToRemove;
+	TPair<FString, bool> mPairToRemove;//The State that we need to remove from the given state
 
+	//Copy the given state to the new state.
 	for (TPair<FString, bool > mState : a_smCurrentState)
 	{
 		smNewState.Add(TPair<FString, bool>(mState.Key, mState.Value));
@@ -189,7 +201,7 @@ TSet<TPair<FString, bool>> Planner::RefreshPlayersState(TSet<TPair<FString, bool
 
 		for (TPair<FString, bool> mState : smNewState)
 		{
-			if (mChange.Key == mState.Key)
+			if (mChange.Key == mState.Key)//If this key exists in the old states.
 			{
 				bKeyExists = true;
 				mPairToRemove = mState;
@@ -199,13 +211,13 @@ TSet<TPair<FString, bool>> Planner::RefreshPlayersState(TSet<TPair<FString, bool
 
 		if (bKeyExists)
 		{
-			smNewState.Remove(mPairToRemove);
+			smNewState.Remove(mPairToRemove);//Remove is from the old state
 			TPair<FString, bool> mUpdatedPair = TPair<FString, bool>(mChange.Key, mChange.Value);
-			smNewState.Add(mUpdatedPair);
+			smNewState.Add(mUpdatedPair);//Add the updated state to the new state list
 		}
 		else
 		{
-			smNewState.Add(TPair<FString, bool>(mChange.Key, mChange.Value));
+			smNewState.Add(TPair<FString, bool>(mChange.Key, mChange.Value));//Otherwise we can just add it again.
 		}
 	}
 	return smNewState;

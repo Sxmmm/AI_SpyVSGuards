@@ -1,4 +1,8 @@
-#include "Action.h"
+#include "GOAP/Action.h"
+#include "Materials/MaterialInstanceDynamic.h"
+#include "Engine/Classes/Components/SkeletalMeshComponent.h"
+#include "Classes/Blueprint/AIBlueprintHelperLibrary.h"
+#include "Engine/Classes/Kismet/GameplayStatics.h"
 
 Action::Action()
 {
@@ -26,12 +30,12 @@ bool Action::IsActionFinished()
 	return false;
 }
 
-bool Action::CheckPreCondition(AActor * a_paAIAgent)
+bool Action::CheckPreCondition(AActor* a_paAIAgent)
 {
 	return false;
 }
 
-bool Action::PerformAction(AActor * a_paAIAgent)
+bool Action::PerformAction(AActor* a_paAIAgent)
 {
 	return false;
 }

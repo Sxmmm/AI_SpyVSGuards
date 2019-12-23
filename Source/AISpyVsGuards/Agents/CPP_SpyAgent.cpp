@@ -1,71 +1,82 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+#include "Agents/CPP_SpyAgent.h"
+#include "Agents/CPP_GuardAgent.h"
+#include "GOAP/GOAP_Behaviour.h"
+#include "GOAP/GOAP_Idle.h"
+
+#include "GOAP/Planner.h"
+#include "GOAP/Action.h"
+
+#include "Engine/Classes/Components/CapsuleComponent.h"
 
 
-#include "CPP_SpyAgent.h"
-
-#include "Classes/Blueprint/AIBlueprintHelperLibrary.h"
-
+// Sets default values
 ACPP_SpyAgent::ACPP_SpyAgent()
 {
-	LoadAvailableActions();
+	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	PrimaryActorTick.bCanEverTick = true;
+
+	m_pTriggerRadius = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Trigger Radius"));
+	m_pTriggerRadius->InitCapsuleSize(250.f, 96.0f);
+	m_pTriggerRadius->SetCollisionProfileName(TEXT("Trigger"));
+	m_pTriggerRadius->SetHiddenInGame(false);
+	m_pTriggerRadius->SetupAttachment(RootComponent);
+	m_pTriggerRadius->OnComponentBeginOverlap.AddDynamic(this, &ACPP_SpyAgent::OnOverlapBeginWhatGuard);
 }
 
-//void ACPP_SpyAgent::LoadAvailableActions()
-//{
-//	//Add all of the actions that the actor can use to a list.
-//	m_sAvailableActions.Add(new Action_KillSelf);
-//	m_sAvailableActions.Add(new Action_BiteActor);
-//	m_sAvailableActions.Add(new Action_Mutate);
-//	m_sAvailableActions.Add(new Action_Wander);
-//}
-
-TSet<TPair<FString, bool>> ACPP_SpyAgent::GetPlayersCurrentState()
+// Called when the game starts or when spawned
+void ACPP_SpyAgent::BeginPlay()
 {
-	//Create a list of Player states that tell the GOAP planner what actions it can perform
-	//Used to compare against an actions pre conditions.
-	TSet<TPair<FString, bool>> PlayerStateData = TSet<TPair<FString, bool>>();
-	PlayerStateData.Add(TPair<FString, bool>("Spotted", HaveIBeenSpotted()));
-	PlayerStateData.Add(TPair<FString, bool>("GuardsNear", AreGuardsNear()));
-	PlayerStateData.Add(TPair<FString, bool>("HaveKey", DoIHaveTheKey()));
-	PlayerStateData.Add(TPair<FString, bool>("AboutToCatch", IsGuardAboutToCatchMe()));
-	return PlayerStateData;
+	Super::BeginPlay();
+
+	m_pIdleState = new GOAP_Idle(this);
+	m_pCurrentBehaviour = m_pIdleState;
 }
 
-bool ACPP_SpyAgent::MoveAgentToAction(GOAP_Action * a_NextAction)
+// Called every frame
+void ACPP_SpyAgent::Tick(float DeltaTime)
 {
-	if (a_NextAction != nullptr)//Null check
+	Super::Tick(DeltaTime);
+
+	if (m_pCurrentBehaviour)
 	{
-		AAIController* pAIController = Cast<AAIController>(GetController());
-		if (pAIController)
+		GOAP_Behaviour* pNewBehaviour = m_pCurrentBehaviour->CheckConditions();
+		if (pNewBehaviour)
 		{
-			float fDistance = FVector::Dist(GetActorLocation(), a_NextAction->m_paTarget->GetActorLocation());//Get distance between Actor and target
+			delete m_pCurrentBehaviour;
 
-			UAIBlueprintHelperLibrary::SimpleMoveToActor(pAIController, a_NextAction->m_paTarget);//Move to target actor
+			m_pCurrentBehaviour = pNewBehaviour;
+		}
+		else if (m_bInterruptBehaviour)
+		{
+			m_bInterruptBehaviour = false;
+			delete m_pCurrentBehaviour;
+			m_pCurrentBehaviour = new GOAP_Idle(this);
+		}
 
-			if (fDistance <= m_fArrivalDistance)//If we are close enough
-			{
-				return true;//We have arrived
-			}
+		m_pCurrentBehaviour->Update();
+	}
+}
+
+void ACPP_SpyAgent::InterruptBehaviour()
+{
+	m_bInterruptBehaviour = true;
+}
+
+// Called to bind functionality to input
+void ACPP_SpyAgent::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+}
+
+void ACPP_SpyAgent::OnOverlapBeginWhatGuard(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (OtherActor && (OtherActor != this) && OtherComp)
+	{
+		ACPP_GuardAgent* pOtherAgent = Cast<ACPP_GuardAgent>(OtherActor);
+		if (pOtherAgent)
+		{
+			ACPP_GOAP* Controller = Cast<ACPP_GOAP>(GetController());
+			Controller->SetHasSpotted(true);
 		}
 	}
-	return false;
-}
-
-bool ACPP_SpyAgent::MoveAgentToAction(GOAP_Action * a_NextAction, bool a_bVector)
-{
-	if (a_NextAction != nullptr)
-	{
-		AAIController* pAIController = Cast<AAIController>(GetController());
-		if (pAIController)
-		{
-			float fDistance = FVector::Dist(GetActorLocation(), a_NextAction->m_vTargetLocation);//Get distance between actor and target.
-
-			UAIBlueprintHelperLibrary::SimpleMoveToLocation(pAIController, a_NextAction->m_vTargetLocation);//Move there
-			if (fDistance <= m_fArrivalDistance)//Have we arrived?
-			{
-				return true;
-			}
-		}
-	}
-	return false;
 }

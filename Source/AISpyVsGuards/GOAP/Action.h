@@ -2,7 +2,7 @@
 
 #include "Set.h"
 #include "Map.h"
-#include "string"
+#include "String"
 #include "CoreMinimal.h"
 
 class AActor;
@@ -11,11 +11,11 @@ class Action
 {
 public:
 	Action();
-	~Action();
+	virtual ~Action();
 
 	float m_fCost = 1.0f;
 	AActor* m_paTarget;
-	FVector m_vTargetLocation;
+	FVector m_vTargetLocation;//Used if target is a location rather than an actor.
 	FString m_sActionName;
 
 	void ResetAction();
@@ -41,5 +41,4 @@ private:
 	TSet<TPair<FString, bool>> m_smEffects;
 
 	bool m_bInRange = false;
-
 };

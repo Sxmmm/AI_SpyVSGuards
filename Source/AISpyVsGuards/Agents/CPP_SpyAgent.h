@@ -4,8 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Containers/Queue.h"
+//#include "GOAP/GOAP_Behaviour.h"
 //KEEP THIS INCLUDE LAST
 #include "CPP_SpyAgent.generated.h"
+
+class GOAP_Behaviour;
 
 UCLASS()
 class AISPYVSGUARDS_API ACPP_SpyAgent : public ACharacter
@@ -16,41 +20,29 @@ public:
 	// Sets default values for this character's properties
 	ACPP_SpyAgent();
 
-	void LoadAvailableActions();
+protected:
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
 
-	TSet<TPair<FString, bool>> GetPlayersCurrentState();
+public:
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
 
-	TSet<TPair<FString, bool>> CreateGoalState();
+	virtual void InterruptBehaviour();
 
-	void PlanFailed(TSet<TPair<FString, bool>> a_kvpFailedGoal);
-	//Need GOAP_Action first
-	//void PlanFound(TSet<TPair<FString, bool>> a_kvpGoal, TQueue<GOAP_Action*> a_qActionQueue);
+	// Called to bind functionality to input
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	void AllActionsFinished();
+	void SetBehaviour(GOAP_Behaviour* a_pBehaviour) { m_pCurrentBehaviour = a_pBehaviour; }
 
-	//Need GOAP_Action first
-	//void AbortPlan(GOAP_Action* a_FailedAction);
+	UFUNCTION()
+		void OnOverlapBeginWhatGuard(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
-	//bool MoveAgentToAction(GOAP_Action* a_NextAction);
+private:
+	UPROPERTY(EditAnywhere, Category = "Trigger Capsule")
+		class UCapsuleComponent* m_pTriggerRadius;
 
-	//bool MoveAgentToAction(GOAP_Action* a_NextAction, bool a_bVector);
-
-	//TSet<GOAP_Action*> GetActionList();
-
-	bool HaveIBeenSpotted();
-	void SetHaveIBeenSpotted(bool a_bSpotted);
-	bool AreGuardsNear();
-	void SetAreGuardsNear(bool a_bGuardsNear);
-	bool DoIHaveTheKey();
-	void SetDoIHaveTheKey(bool a_bHaveKey);
-	bool IsGuardAboutToCatchMe();
-	void SetIsGuardAboutToCatchMe(bool a_bAboutToCatch);
-
-private:	
-	bool m_bHaveBeenSpotted = false;
-	bool m_bAreGuardsNear = false;
-	bool m_bDoIHaveTheKey = false;
-	bool m_bIsGuardAboutToCatchMe = false;
-
-	//TSet<GOAP_Action*> m_sAvailableActions;
+	GOAP_Behaviour* m_pCurrentBehaviour;
+	GOAP_Behaviour* m_pIdleState;
+	bool m_bInterruptBehaviour = false;
 };
