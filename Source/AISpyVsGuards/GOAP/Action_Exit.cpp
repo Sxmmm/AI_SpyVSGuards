@@ -44,6 +44,7 @@ bool Action_Exit::CheckPreCondition(AActor * a_paAIAgent)
 		m_vTargetLocation = FVector(1585.0f, -1690.0, 253.0f);
 		return true;
 	}*/
+	UE_LOG(LogTemp, Warning, TEXT("Checking EXIT"))
 	m_vTargetLocation = FVector(1585.0f, -1690.0, 253.0f);
 	return true;
 }
@@ -51,6 +52,7 @@ bool Action_Exit::CheckPreCondition(AActor * a_paAIAgent)
 bool Action_Exit::PerformAction(AActor * a_paAIAgent)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Spy has won!"));
+	UE_LOG(LogTemp, Warning, TEXT("EXIT DONE!!!"));
 	m_bPerformingAction = true;
 	return true;
 }

@@ -1,5 +1,6 @@
 #include "Agents/CPP_SpyAgent.h"
 #include "Agents/CPP_GuardAgent.h"
+#include "Agents/CPP_GOAP.h"
 #include "GOAP/GOAP_Behaviour.h"
 #include "GOAP/GOAP_Idle.h"
 
@@ -16,8 +17,8 @@ ACPP_SpyAgent::ACPP_SpyAgent()
 	PrimaryActorTick.bCanEverTick = true;
 
 	m_pTriggerRadius = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Trigger Radius"));
-	m_pTriggerRadius->InitCapsuleSize(250.f, 96.0f);
-	m_pTriggerRadius->SetCollisionProfileName(TEXT("Trigger"));
+	m_pTriggerRadius->InitCapsuleSize(650.0f, 96.0f);
+	m_pTriggerRadius->SetCollisionProfileName(TEXT("OverlapOnlyPawn"));
 	m_pTriggerRadius->SetHiddenInGame(false);
 	m_pTriggerRadius->SetupAttachment(RootComponent);
 	m_pTriggerRadius->OnComponentBeginOverlap.AddDynamic(this, &ACPP_SpyAgent::OnOverlapBeginWhatGuard);
@@ -72,11 +73,6 @@ void ACPP_SpyAgent::OnOverlapBeginWhatGuard(class UPrimitiveComponent* Overlappe
 {
 	if (OtherActor && (OtherActor != this) && OtherComp)
 	{
-		ACPP_GuardAgent* pOtherAgent = Cast<ACPP_GuardAgent>(OtherActor);
-		if (pOtherAgent)
-		{
-			ACPP_GOAP* Controller = Cast<ACPP_GOAP>(GetController());
-			Controller->SetHasSpotted(true);
-		}
+		UE_LOG(LogTemp, Warning, TEXT("guard in spy range"));
 	}
 }

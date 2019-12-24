@@ -15,7 +15,6 @@ void GOAP_Move::Update()
 GOAP_Behaviour* GOAP_Move::CheckConditions()
 {
 	//Moving to an Actions FVector location rather than its target.
-	//Used in the Wander action.
 	if (!m_pCurrentAction->m_paTarget && m_pCurrentAction->NeedsToBeInRange())//Actor needs to go somewhere but there is no target
 	{
 		if (m_pCurrentAction->m_vTargetLocation != FVector::ZeroVector)//If the Target location variable is not empty.

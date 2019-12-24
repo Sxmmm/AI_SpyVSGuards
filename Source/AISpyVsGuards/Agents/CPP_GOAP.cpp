@@ -4,10 +4,6 @@
 #include "AIController.h"
 #include "GOAP/GOAP_Idle.h"
 
-//#include "GOAP/Actions/Action_BiteActor.h"
-//#include "GOAP/Actions/Action_KillSelf.h"
-//#include "GOAP/Actions/Action_Mutate.h"
-//#include "GOAP/Actions/Action_Wander.h"
 // Actions 
 #include "GOAP/Action_GetKey.h"
 #include "GOAP/Action_Exit.h"
@@ -26,10 +22,6 @@ ACPP_GOAP::ACPP_GOAP()
 void ACPP_GOAP::LoadAvailableActions()
 {
 	//Add all of the actions that the actor can use to a list.
-	/*m_sAvailableActions.Add(new Action_KillSelf);
-	m_sAvailableActions.Add(new Action_BiteActor);
-	m_sAvailableActions.Add(new Action_Mutate);
-	m_sAvailableActions.Add(new Action_Wander);*/
 	m_sAvailableActions.Add(new Action_GetKey);
 	m_sAvailableActions.Add(new Action_Exit);
 	m_sAvailableActions.Add(new Action_Flee);

@@ -11,7 +11,7 @@
 Action_GetKey::Action_GetKey()
 {
 	////Players State preconditions for this action
-	//AddPreCondition("Infected", true);
+	AddPreCondition("Spotted", false);
 
 	//How this action will affect the Players state
 	AddEffect("HasKey", true);
@@ -38,6 +38,8 @@ bool Action_GetKey::IsActionFinished()
 
 bool Action_GetKey::CheckPreCondition(AActor * a_paAIAgent)
 {
+	UE_LOG(LogTemp, Warning, TEXT("Checking Get Key"));
+
 	if (Cast<ACPP_GOAP>(a_paAIAgent)->GetHaveKey() == true)
 	{
 		return false;
@@ -51,6 +53,7 @@ bool Action_GetKey::CheckPreCondition(AActor * a_paAIAgent)
 
 bool Action_GetKey::PerformAction(AActor * a_paAIAgent)
 {
+	UE_LOG(LogTemp, Warning, TEXT("GET KEY DONE!!!"));
 	Cast<ACPP_GOAP>(a_paAIAgent)->SetHaveKey(true);
 	m_bPerformingAction = true;
 	return true;

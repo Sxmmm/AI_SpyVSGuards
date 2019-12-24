@@ -4,8 +4,7 @@
 #include "Agents/CPP_GOAP.h"
 #include "AIController.h"
 
-#include "Materials/MaterialInstanceDynamic.h"
-#include "Engine/Classes/Components/SkeletalMeshComponent.h"
+#include "NavigationSystem.h"
 #include "Classes/Blueprint/AIBlueprintHelperLibrary.h"
 #include "Engine/Classes/Kismet/GameplayStatics.h"
 
@@ -18,7 +17,7 @@ Action_Flee::Action_Flee()
 	AddEffect("Spotted", false);
 
 	m_sActionName = "Flee From Guards";
-	m_fCost = 1.0f;//Figurative cost of performing this action.
+	m_fCost = 0.1f;//Figurative cost of performing this action.
 	m_bRequiresInRange = true;
 }
 
@@ -39,13 +38,14 @@ bool Action_Flee::IsActionFinished()
 
 bool Action_Flee::CheckPreCondition(AActor * a_paAIAgent)
 {
-	TArray<AActor*> aFoundAgents;//To store list of all agents
+	UE_LOG(LogTemp, Warning, TEXT("Checking FLEE"));
+	TArray<AActor*> aFoundAgents;
 	UGameplayStatics::GetAllActorsOfClass(a_paAIAgent->GetWorld(), ACPP_GuardAgent::StaticClass(), aFoundAgents);
-	float fClosestDistance = 100000.0f;//Max distance to compare to
-
-	for (AActor* a_Actor : aFoundAgents)//Loop through actor list
+	float fClosestDistance = 100000.0f;
+	ACPP_GOAP* GOAPSpotted = Cast<ACPP_GOAP>(a_paAIAgent);
+	for (AActor* a_Actor : aFoundAgents)
 	{
-		if (a_Actor)//Null check
+		if (a_Actor)
 		{
 			float fThisDistance = FVector::Dist(a_paAIAgent->GetActorLocation(), a_Actor->GetActorLocation());//Get distance between two actors
 			if (fThisDistance <= 0.0f)//If the target is me, temp fix for broken check above.
@@ -56,16 +56,28 @@ bool Action_Flee::CheckPreCondition(AActor * a_paAIAgent)
 			{
 				//m_paTarget = a_Actor;//Set new target
 				fClosestDistance = fThisDistance;//New closest distance
-				m_vTargetLocation = FVector(1.0f, 1.0f, 1.0f);
 			}
 		}
+		//FVector Target = (a_paAIAgent->GetActorLocation() - a_Actor->GetActorLocation());
+		ACPP_GOAP* pAIAgent = Cast<ACPP_GOAP>(a_paAIAgent);
+		AAIController* pAIController = Cast<AAIController>(a_paAIAgent);
+		UNavigationSystemV1* NavSys = UNavigationSystemV1::GetCurrent(pAIAgent->GetWorld());
+		FVector FleePosition = a_Actor->GetActorLocation() - a_paAIAgent->GetActorLocation() - a_paAIAgent->GetActorLocation();
+		FleePosition.Normalize();
+		m_vTargetLocation = NavSys->GetRandomReachablePointInRadius(pAIAgent->GetWorld(), FleePosition, FVector::Dist(a_paAIAgent->GetActorLocation(), a_Actor->GetActorLocation()));
+		//FVector::Dist(a_paAIAgent->GetActorLocation(), a_Actor->GetActorLocation())
+		
+		//m_vTargetLocation = FVector(a_paAIAgent->GetActorLocation() - a_Actor->GetActorLocation()).Normalize;
+		//m_vTargetLocation = FVector(-500.0f, 1700.0f, 253.0f);
 	}
 	return true;
 }
 
 bool Action_Flee::PerformAction(AActor * a_paAIAgent)
 {
+	UE_LOG(LogTemp, Warning, TEXT("DONE FLEE!!!"));
 	Cast<ACPP_GOAP>(a_paAIAgent)->SetHasSpotted(false);
+	Cast<ACPP_GOAP>(a_paAIAgent)->InterruptBehaviour();
 	m_bPerformingAction = true;
 	return true;
 }
