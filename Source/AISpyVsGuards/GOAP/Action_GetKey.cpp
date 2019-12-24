@@ -10,14 +10,14 @@
 
 Action_GetKey::Action_GetKey()
 {
-	////Players State preconditions for this action
+	//The AI must not be spotted before it can go to the key
 	AddPreCondition("Spotted", false);
 
-	//How this action will affect the Players state
+	//This is the outcome
 	AddEffect("HasKey", true);
 
 	m_sActionName = "Get The Key";
-	m_fCost = 1.0f;//Figurative cost of performing this action.
+	m_fCost = 1.0f;
 	m_bRequiresInRange = true;
 }
 
@@ -31,12 +31,12 @@ void Action_GetKey::ResetGA()
 	m_paTarget = nullptr;
 	//m_vTargetLocation = FVector::ZeroVector;
 }
-
+//Used to determine if the current action has finished
 bool Action_GetKey::IsActionFinished()
 {
 	return m_bPerformingAction;
 }
-
+//Used for the planner to check if it can perform this action
 bool Action_GetKey::CheckPreCondition(AActor * a_paAIAgent)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Checking Get Key"));
@@ -64,7 +64,7 @@ bool Action_GetKey::CheckPreCondition(AActor * a_paAIAgent)
 		return true;
 	}
 }
-
+//If it can perform the action it will perform this
 bool Action_GetKey::PerformAction(AActor * a_paAIAgent)
 {
 	UE_LOG(LogTemp, Warning, TEXT("GET KEY DONE!!!"));

@@ -1,9 +1,11 @@
 #include "CPP_GuardAgent.h"
 #include "Agents/CPP_SpyAgent.h"
 #include "Agents/CPP_GOAP.h"
+
 #include "StateMachine/Behaviour.h"
 #include "StateMachine/Patrol.h"
 #include "StateMachine/Attack.h"
+
 #include "Engine/Classes/Kismet/GameplayStatics.h"
 #include "Engine/Classes/Components/CapsuleComponent.h"
 #include "Engine/Classes/Components/BoxComponent.h"

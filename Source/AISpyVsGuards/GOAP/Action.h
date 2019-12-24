@@ -15,7 +15,7 @@ public:
 
 	float m_fCost = 1.0f;
 	AActor* m_paTarget;
-	FVector m_vTargetLocation;//Used if target is a location rather than an actor.
+	FVector m_vTargetLocation;
 	FString m_sActionName;
 
 	void ResetAction();

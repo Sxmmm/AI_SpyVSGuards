@@ -14,45 +14,50 @@ void GOAP_Move::Update()
 
 GOAP_Behaviour* GOAP_Move::CheckConditions()
 {
-	//Moving to an Actions FVector location rather than its target.
-	if (!m_pCurrentAction->m_paTarget && m_pCurrentAction->NeedsToBeInRange())//Actor needs to go somewhere but there is no target
+	//Moving to an actions fvector rather than an actor 
+	if (!m_pCurrentAction->m_paTarget && m_pCurrentAction->NeedsToBeInRange())
 	{
-		if (m_pCurrentAction->m_vTargetLocation != FVector::ZeroVector)//If the Target location variable is not empty.
+		//If the target does not eqaul 0,0,0
+		if (m_pCurrentAction->m_vTargetLocation != FVector::ZeroVector)
 		{
 			ACPP_GOAP* pAIAgent = Cast<ACPP_GOAP>(GetOwner());
 			if (pAIAgent)
 			{
-				if (pAIAgent->MoveAgentToAction(m_pCurrentAction, true) == true)//If the actor has reached its destination
+				//Reached destination
+				if (pAIAgent->MoveAgentToAction(m_pCurrentAction, true) == true)
 				{
 					m_pCurrentAction->m_vTargetLocation = FVector::ZeroVector;
-					return new GOAP_PerformAction(GetOwner(), m_pCurrentAction);//We can now perform the action.
+					//Perform action
+					return new GOAP_PerformAction(GetOwner(), m_pCurrentAction);
 				}
 			}
 		}
-		else//Catch case for unsetup Action, needs to replan.
+		else
 		{
 			return new GOAP_Idle(GetOwner());
 		}
 	}
 
 	//Moving to an actions target actor.
-	else if (m_pCurrentAction->m_paTarget && m_pCurrentAction->NeedsToBeInRange() == true)//Actor needs to go to target
+	else if (m_pCurrentAction->m_paTarget && m_pCurrentAction->NeedsToBeInRange() == true)
 	{
 		ACPP_GOAP* pAIAgent = Cast<ACPP_GOAP>(GetOwner());
 		if (pAIAgent)
 		{
-			if (pAIAgent->MoveAgentToAction(m_pCurrentAction))//If actor has reached its destination.
+			//Reached destination
+			if (pAIAgent->MoveAgentToAction(m_pCurrentAction))
 			{
-				return new GOAP_PerformAction(GetOwner(), m_pCurrentAction);//We can now perform the action.
+				//Perform action
+				return new GOAP_PerformAction(GetOwner(), m_pCurrentAction);
 			}
 		}
 	}
-	else if (m_pCurrentAction->NeedsToBeInRange() == false)//If we do not need to be in range of the target to perform the action.
+	//Do not need to be in range
+	else if (m_pCurrentAction->NeedsToBeInRange() == false)
 	{
-		return new GOAP_PerformAction(GetOwner(), m_pCurrentAction);//Perform it
+		//Perform action
+		return new GOAP_PerformAction(GetOwner(), m_pCurrentAction);
 	}
 
-	return nullptr;//Replan
-
-	//To do - Perform action anyway with error catcher, otherwise actors get stuck.
+	return nullptr;
 }

@@ -1,12 +1,9 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Containers/Queue.h"
-//#include "GOAP/GOAP_Behaviour.h"
-//KEEP THIS INCLUDE LAST
+
 #include "CPP_SpyAgent.generated.h"
 
 class GOAP_Behaviour;

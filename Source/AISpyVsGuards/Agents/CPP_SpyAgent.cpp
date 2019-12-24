@@ -1,16 +1,17 @@
+//Includes
 #include "Agents/CPP_SpyAgent.h"
 #include "Agents/CPP_GuardAgent.h"
 #include "Agents/CPP_GOAP.h"
+
 #include "GOAP/GOAP_Behaviour.h"
 #include "GOAP/GOAP_Idle.h"
-
 #include "GOAP/Planner.h"
 #include "GOAP/Action.h"
 
 #include "Engine/Classes/Components/CapsuleComponent.h"
 
 
-// Sets default values
+//Default values, setting up trigger for sight
 ACPP_SpyAgent::ACPP_SpyAgent()
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
@@ -24,7 +25,7 @@ ACPP_SpyAgent::ACPP_SpyAgent()
 	m_pTriggerRadius->OnComponentBeginOverlap.AddDynamic(this, &ACPP_SpyAgent::OnOverlapBeginWhatGuard);
 }
 
-// Called when the game starts or when spawned
+// Called when the game starts
 void ACPP_SpyAgent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -33,7 +34,7 @@ void ACPP_SpyAgent::BeginPlay()
 	m_pCurrentBehaviour = m_pIdleState;
 }
 
-// Called every frame
+// Called every frame, checking for a new behaviour or if the behaviour has been interrupted
 void ACPP_SpyAgent::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -69,10 +70,12 @@ void ACPP_SpyAgent::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
+//Trigger for spy sight
 void ACPP_SpyAgent::OnOverlapBeginWhatGuard(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (OtherActor && (OtherActor != this) && OtherComp)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("guard in spy range"));
+		//ToDo - Call HasSpotted function from here
 	}
 }

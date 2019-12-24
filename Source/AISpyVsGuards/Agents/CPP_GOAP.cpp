@@ -1,16 +1,15 @@
+//Header includes 
 #include "Agents/CPP_GOAP.h"
 #include "GOAP/Action.h"
 #include "Agents/CPP_SpyAgent.h"
 #include "AIController.h"
 #include "GOAP/GOAP_Idle.h"
 
-// Actions 
+//Actions 
 #include "GOAP/Action_GetKey.h"
 #include "GOAP/Action_Exit.h"
 #include "GOAP/Action_Flee.h"
 
-#include "Materials/MaterialInstanceDynamic.h"
-#include "Engine/Classes/Components/SkeletalMeshComponent.h"
 #include "Classes/Blueprint/AIBlueprintHelperLibrary.h"
 #include "Engine/Classes/Kismet/GameplayStatics.h"
 
@@ -39,8 +38,7 @@ TSet<TPair<FString, bool>> ACPP_GOAP::GetPlayersCurrentState()
 
 TSet<TPair<FString, bool>> ACPP_GOAP::CreateGoalState()
 {
-	//Create a goal state
-	//You can have multiple goals.
+	//Goal state
 	TSet<TPair<FString, bool>> GoalData = TSet<TPair<FString, bool>>();
 
 	GoalData.Add(TPair<FString, bool>("Exit", true));
@@ -65,7 +63,7 @@ void ACPP_GOAP::AllActionsFinished()
 void ACPP_GOAP::AbortPlan(Action* a_FailedAction)
 {
 }
-
+//Used to move the AI to an agent
 bool ACPP_GOAP::MoveAgentToAction(Action* a_NextAction)
 {
 	if (a_NextAction != nullptr)//Null check
@@ -85,7 +83,7 @@ bool ACPP_GOAP::MoveAgentToAction(Action* a_NextAction)
 	}
 	return false;
 }
-
+//Used to move the AI to a fvector
 bool ACPP_GOAP::MoveAgentToAction(Action* a_NextAction, bool a_bVector)
 {
 	if (a_NextAction != nullptr)
@@ -110,6 +108,7 @@ TSet<Action*> ACPP_GOAP::GetActionList()
 	return m_sAvailableActions;
 }
 
+//Get and set functions for if the spy has been spotted and if the spy has the key
 bool ACPP_GOAP::GetHasSpotted()
 {
 	return m_bSpotted;

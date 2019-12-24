@@ -15,8 +15,8 @@ public:
 
 private:
 
-	AActor* m_pTargetActor;//Stores the actor that we are chasing
-	TQueue<Action*> ActionPlan;//Stores the queue of actions.
+	AActor* m_pTargetActor;
+	TQueue<Action*> ActionPlan;
 
-	Planner* m_ActionPlanner;//Planner reference
+	Planner* m_ActionPlanner;
 };

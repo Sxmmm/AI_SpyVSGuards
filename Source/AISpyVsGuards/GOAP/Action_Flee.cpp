@@ -11,14 +11,14 @@
 
 Action_Flee::Action_Flee()
 {
-	////Players State preconditions for this action
+	//If the AI has been spotted it can perform this action
 	AddPreCondition("Spotted", true);
 
-	//How this action will affect the Players state
+	//This will be the outcome after completing this action
 	AddEffect("Spotted", false);
 
 	m_sActionName = "Flee From Guards";
-	m_fCost = 0.1f;//Figurative cost of performing this action.
+	m_fCost = 0.1f;
 	m_bRequiresInRange = true;
 }
 
@@ -31,12 +31,12 @@ void Action_Flee::ResetGA()
 	m_bPerformingAction = false;
 	m_paTarget = nullptr;
 }
-
+//Used to determine if the current action has finished
 bool Action_Flee::IsActionFinished()
 {
 	return m_bPerformingAction;
 }
-
+//Used for the planner to check if it can perform this action
 bool Action_Flee::CheckPreCondition(AActor * a_paAIAgent)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Checking FLEE"));
@@ -74,13 +74,10 @@ bool Action_Flee::CheckPreCondition(AActor * a_paAIAgent)
 	}
 	return true;
 }
-
+//If it can perform the action it will perform this
 bool Action_Flee::PerformAction(AActor * a_paAIAgent)
 {
 	m_bPerformingAction = true;
-
-
-
 	UE_LOG(LogTemp, Warning, TEXT("DONE FLEE!!!"));
 	Cast<ACPP_GOAP>(a_paAIAgent)->SetHasSpotted(false);
 	Cast<ACPP_GOAP>(a_paAIAgent)->InterruptBehaviour();

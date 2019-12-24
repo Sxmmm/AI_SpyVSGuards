@@ -14,7 +14,7 @@ public:
 
 private:
 
-	AActor* m_pTargetActor;//Stores the actor that we are chasing
+	AActor* m_pTargetActor;
 
-	Action* m_pCurrentAction;//The action we are moving to
+	Action* m_pCurrentAction;
 };

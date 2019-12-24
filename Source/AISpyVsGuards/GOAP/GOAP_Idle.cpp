@@ -9,14 +9,18 @@
 
 GOAP_Idle::GOAP_Idle(ACPP_SpyAgent* pOwner) : GOAP_Behaviour(pOwner)
 {
-	m_ActionPlanner = new Planner();//Create a new planner
+	//Creating a new planner
+	m_ActionPlanner = new Planner();
 
-	TSet<TPair<FString, bool>> WorldState = Cast<ACPP_GOAP>(pOwner)->GetPlayersCurrentState();//Get the players current state
-	TSet<TPair<FString, bool>> GoalState = Cast<ACPP_GOAP>(pOwner)->CreateGoalState();//Get the players current goals.
+	//Get the ai state and current goals
+	TSet<TPair<FString, bool>> WorldState = Cast<ACPP_GOAP>(pOwner)->GetPlayersCurrentState();
+	TSet<TPair<FString, bool>> GoalState = Cast<ACPP_GOAP>(pOwner)->CreateGoalState();
 
-	TSet<Action*> sActionList = Cast<ACPP_GOAP>(pOwner)->GetActionList();//Get the players available actions
+	//Get available actions
+	TSet<Action*> sActionList = Cast<ACPP_GOAP>(pOwner)->GetActionList();
 
-	m_ActionPlanner->CreateActionPlan(pOwner, sActionList, WorldState, GoalState, &ActionPlan);//Create an actionplan
+	//Create a plan
+	m_ActionPlanner->CreateActionPlan(pOwner, sActionList, WorldState, GoalState, &ActionPlan);
 }
 
 GOAP_Idle::~GOAP_Idle()
@@ -33,13 +37,12 @@ void GOAP_Idle::Update()
 
 GOAP_Behaviour* GOAP_Idle::CheckConditions()
 {
-	if (!ActionPlan.IsEmpty())//If there actually is a plan.
+	//If there is a plan go through the actions
+	if (!ActionPlan.IsEmpty())
 	{
 		Action* pOutAction;
-		ActionPlan.Peek(pOutAction);//Get the first action from the plan
-		return new GOAP_Move(GetOwner(), pOutAction);//Start moving to the action
+		ActionPlan.Peek(pOutAction);
+		return new GOAP_Move(GetOwner(), pOutAction);
 	}
-	return new GOAP_Idle(GetOwner());//There is no plan so we need to replan.
-
-	//TO DO - Set replan to a timer so its not running every single frame.
+	return new GOAP_Idle(GetOwner());
 }

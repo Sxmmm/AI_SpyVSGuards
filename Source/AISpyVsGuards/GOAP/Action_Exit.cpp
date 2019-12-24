@@ -10,13 +10,13 @@
 
 Action_Exit::Action_Exit()
 {
-	////Players State preconditions for this action
+	//The AI needs the key before can exit
 	AddPreCondition("HasKey", true);
 
 	AddEffect("Exit", true);
 
 	m_sActionName = "Get To Exit";
-	m_fCost = 1.0f;//Figurative cost of performing this action.
+	m_fCost = 1.0f;
 	m_bRequiresInRange = true;
 }
 
@@ -28,31 +28,21 @@ void Action_Exit::ResetGA()
 {
 	m_bPerformingAction = false;
 	m_paTarget = nullptr;
-	//m_vTargetLocation = FVector::ZeroVector;
 }
-
+//Used to determine if the current action has finished
 bool Action_Exit::IsActionFinished()
 {
 	return m_bPerformingAction;
 }
-
+//Used for the planner to check if it can perform this action
 bool Action_Exit::CheckPreCondition(AActor * a_paAIAgent)
 {
-	/*if (Cast<ACPP_GOAP>(a_paAIAgent)->GetHaveKey == false)
-	{
-		return false;
-	}
-	else
-	{
-		m_vTargetLocation = FVector(1585.0f, -1690.0, 253.0f);
-		return true;
-	}*/
 	UE_LOG(LogTemp, Warning, TEXT("Checking EXIT"))
 	m_vTargetLocation = FVector(1585.0f, -1690.0, 253.0f);
 
 	return true;
 }
-
+//If it can perform the action it will perform this
 bool Action_Exit::PerformAction(AActor * a_paAIAgent)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Spy has won!"));

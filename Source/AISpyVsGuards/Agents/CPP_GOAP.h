@@ -32,8 +32,6 @@ public:
 
 	TSet<Action*> GetActionList();
 
-	//Self explanatory Get and set functions\/
-
 	bool GetHasSpotted();
 	void SetHasSpotted(bool a_bSpotted);
 	bool GetHaveKey();
@@ -43,7 +41,7 @@ public:
 
 private:
 	UPROPERTY(EditAnywhere)
-		bool m_bSpotted = false;//Tells us whether the agent is infected or not
+		bool m_bSpotted = false;
 
 	bool m_bHasKey = false;
 
