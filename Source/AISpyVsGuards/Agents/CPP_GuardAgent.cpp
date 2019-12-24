@@ -96,11 +96,8 @@ void ACPP_GuardAgent::OnSightOverlapBegin(class UPrimitiveComponent* OverlappedC
 		ACPP_SpyAgent* pOtherAgent = Cast<ACPP_SpyAgent>(OtherActor);
 		if (pOtherAgent)
 		{
-			if (Cast<ACPP_GOAP>(OtherActor)->GetHasSpotted() == false)
-			{
-				Cast<ACPP_GOAP>(OtherActor)->SetHasSpotted(true);
-				Cast<ACPP_GOAP>(OtherActor)->InterruptBehaviour();
-			}
+			Cast<ACPP_GOAP>(OtherActor)->SetHasSpotted(true);
+			Cast<ACPP_GOAP>(OtherActor)->InterruptBehaviour();
 			UE_LOG(LogTemp, Warning, TEXT("Spotted The Spy!!!"));
 			SetHasSpottedStatus(true);
 		}

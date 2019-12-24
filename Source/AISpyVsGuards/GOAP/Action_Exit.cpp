@@ -13,6 +13,8 @@ Action_Exit::Action_Exit()
 	////Players State preconditions for this action
 	AddPreCondition("HasKey", true);
 
+	AddEffect("Exit", true);
+
 	m_sActionName = "Get To Exit";
 	m_fCost = 1.0f;//Figurative cost of performing this action.
 	m_bRequiresInRange = true;
@@ -26,6 +28,7 @@ void Action_Exit::ResetGA()
 {
 	m_bPerformingAction = false;
 	m_paTarget = nullptr;
+	//m_vTargetLocation = FVector::ZeroVector;
 }
 
 bool Action_Exit::IsActionFinished()
@@ -46,6 +49,7 @@ bool Action_Exit::CheckPreCondition(AActor * a_paAIAgent)
 	}*/
 	UE_LOG(LogTemp, Warning, TEXT("Checking EXIT"))
 	m_vTargetLocation = FVector(1585.0f, -1690.0, 253.0f);
+
 	return true;
 }
 

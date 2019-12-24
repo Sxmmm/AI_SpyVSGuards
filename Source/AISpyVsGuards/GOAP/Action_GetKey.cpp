@@ -29,6 +29,7 @@ void Action_GetKey::ResetGA()
 {
 	m_bPerformingAction = false;
 	m_paTarget = nullptr;
+	//m_vTargetLocation = FVector::ZeroVector;
 }
 
 bool Action_GetKey::IsActionFinished()
@@ -46,6 +47,19 @@ bool Action_GetKey::CheckPreCondition(AActor * a_paAIAgent)
 	}
 	else
 	{
+		/*TArray<AActor*> aFoundAgents;
+		UGameplayStatics::GetAllActorsOfClass(a_paAIAgent->GetWorld(), AActor::StaticClass(), aFoundAgents);
+		for (AActor* a_Actor : aFoundAgents)
+		{
+			if (a_Actor)
+			{
+				if (a_Actor->ActorHasTag("Key"))
+				{
+					UE_LOG(LogTemp, Warning, TEXT("GOTTTT THE KEY LOCATION!!!!!!!!"));
+					m_vTargetLocation = a_Actor->GetActorLocation();
+				}
+			}
+		}*/
 		m_vTargetLocation = FVector(500.0f, 1700.0f, 253.0f);
 		return true;
 	}
