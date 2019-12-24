@@ -24,6 +24,7 @@ GOAP_Behaviour* GOAP_Move::CheckConditions()
 			{
 				if (pAIAgent->MoveAgentToAction(m_pCurrentAction, true) == true)//If the actor has reached its destination
 				{
+					m_pCurrentAction->m_vTargetLocation = FVector::ZeroVector;
 					return new GOAP_PerformAction(GetOwner(), m_pCurrentAction);//We can now perform the action.
 				}
 			}

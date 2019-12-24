@@ -4,6 +4,7 @@
 #include "Agents/CPP_GOAP.h"
 #include "AIController.h"
 
+#include "DrawDebugHelpers.h"
 #include "NavigationSystem.h"
 #include "Classes/Blueprint/AIBlueprintHelperLibrary.h"
 #include "Engine/Classes/Kismet/GameplayStatics.h"
@@ -42,7 +43,6 @@ bool Action_Flee::CheckPreCondition(AActor * a_paAIAgent)
 	TArray<AActor*> aFoundAgents;
 	UGameplayStatics::GetAllActorsOfClass(a_paAIAgent->GetWorld(), ACPP_GuardAgent::StaticClass(), aFoundAgents);
 	float fClosestDistance = 100000.0f;
-	ACPP_GOAP* GOAPSpotted = Cast<ACPP_GOAP>(a_paAIAgent);
 	for (AActor* a_Actor : aFoundAgents)
 	{
 		if (a_Actor)
@@ -62,9 +62,11 @@ bool Action_Flee::CheckPreCondition(AActor * a_paAIAgent)
 		ACPP_GOAP* pAIAgent = Cast<ACPP_GOAP>(a_paAIAgent);
 		AAIController* pAIController = Cast<AAIController>(a_paAIAgent);
 		UNavigationSystemV1* NavSys = UNavigationSystemV1::GetCurrent(pAIAgent->GetWorld());
-		FVector FleePosition = a_Actor->GetActorLocation() - a_paAIAgent->GetActorLocation() - a_paAIAgent->GetActorLocation();
-		FleePosition.Normalize();
-		m_vTargetLocation = NavSys->GetRandomReachablePointInRadius(pAIAgent->GetWorld(), FleePosition, FVector::Dist(a_paAIAgent->GetActorLocation(), a_Actor->GetActorLocation()));
+		FVector FleePosition = a_paAIAgent->GetActorLocation() - a_Actor->GetActorLocation();
+		//FleePosition.GetSafeNormal();
+		m_vTargetLocation = NavSys->GetRandomReachablePointInRadius(pAIAgent->GetWorld(), FleePosition.GetSafeNormal(), FVector::Dist(a_paAIAgent->GetActorLocation(), a_Actor->GetActorLocation())/3);
+		DrawDebugSphere(a_paAIAgent->GetWorld(), FleePosition, FVector::Dist(a_paAIAgent->GetActorLocation(), a_Actor->GetActorLocation()), 12, FColor(0, 0, 255), false, 10.0f);
+		DrawDebugSphere(a_paAIAgent->GetWorld(), m_vTargetLocation, 50.0f, 4, FColor(255, 0, 0), false, 5.0f);
 		//FVector::Dist(a_paAIAgent->GetActorLocation(), a_Actor->GetActorLocation())
 		
 		//m_vTargetLocation = FVector(a_paAIAgent->GetActorLocation() - a_Actor->GetActorLocation()).Normalize;
@@ -75,10 +77,13 @@ bool Action_Flee::CheckPreCondition(AActor * a_paAIAgent)
 
 bool Action_Flee::PerformAction(AActor * a_paAIAgent)
 {
+	m_bPerformingAction = true;
+
+
+
 	UE_LOG(LogTemp, Warning, TEXT("DONE FLEE!!!"));
 	Cast<ACPP_GOAP>(a_paAIAgent)->SetHasSpotted(false);
 	Cast<ACPP_GOAP>(a_paAIAgent)->InterruptBehaviour();
-	m_bPerformingAction = true;
 	return true;
 }
 
